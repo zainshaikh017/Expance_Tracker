@@ -73,7 +73,17 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
     'Food': false,
     'Transport': false,
     'Other': false,
+      'Home Expense': false,
+      'gadges':false,
   };
+DateTime selectedMonth = DateTime.now();
+List<Map<String, dynamic>> get filteredTransactions {
+  return transactions.where((tx) {
+    DateTime txDate = DateTime.parse(tx['timestamp']);
+    return txDate.year == selectedMonth.year &&
+           txDate.month == selectedMonth.month;
+  }).toList();
+}
 
   List<Map<String, dynamic>> transactions = [];
 
@@ -138,7 +148,8 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
       'Other': 0,
     };
 
-    for (var tx in transactions) {
+    // for (var tx in transactions) {
+    for (var tx in filteredTransactions) {
       double amount = tx['amount'];
       bool isExp = tx['isExpense'];
 
@@ -191,6 +202,14 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
       ),
     );
   }
+  String monthName(int month) {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return months[month - 1];
+}
+
 
   void editTransaction(int index) {
     final tx = transactions[index];
@@ -228,7 +247,9 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
     double totalIncome = 0;
     Map<String, double> categoryTotals = {};
 
-    for (var tx in transactions) {
+    // for (var tx in transactions) {
+    for (var tx in filteredTransactions) {
+
       double amt = tx['amount'];
       bool isExp = tx['isExpense'];
       List<String> cats = List<String>.from(tx['categories']);
@@ -375,38 +396,43 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
         title: Text('Daily Expense Tracker'),
 
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-            child: ElevatedButton(
-              onPressed:
-                  generatePrintableReport, // Call report generation function
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(
-                  context,
-                ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
-                foregroundColor: Theme.of(
-                  context,
-                ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
+              Padding(
+     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+           
+                child: ElevatedButton(onPressed: addTransaction, child: Text('Add Entry')),
               ),
-              child: Text('Generate Report'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-            child: ElevatedButton(
-              onPressed: calculateTotalExpense,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(
-                  context,
-                ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
-                foregroundColor: Theme.of(
-                  context,
-                ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
-              ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+          //   child: ElevatedButton(
+          //     onPressed:
+          //         generatePrintableReport, // Call report generation function
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Theme.of(
+          //         context,
+          //       ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
+          //       foregroundColor: Theme.of(
+          //         context,
+          //       ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
+          //     ),
+          //     child: Text('Generate Report'),
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+          //   child: ElevatedButton(
+          //     onPressed: calculateTotalExpense,
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Theme.of(
+          //         context,
+          //       ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
+          //       foregroundColor: Theme.of(
+          //         context,
+          //       ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
+          //     ),
 
-              child: Text('Calculate'),
-            ),
-          ),
+          //     child: Text('Calculate'),
+          //   ),
+          // ),
         ],
       ),
       body: Padding(
@@ -447,14 +473,115 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
               }).toList(),
             ),
             SizedBox(height: 10),
-            ElevatedButton(onPressed: addTransaction, child: Text('Add Entry')),
+            Row(
+              children: [
+                Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+            child: ElevatedButton(
+              onPressed:
+                  generatePrintableReport, // Call report generation function
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(
+                  context,
+                ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
+                foregroundColor: Theme.of(
+                  context,
+                ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
+              ),
+              child: Text('Generate Report'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+            child: ElevatedButton(
+              onPressed: calculateTotalExpense,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(
+                  context,
+                ).elevatedButtonTheme.style?.backgroundColor?.resolve({}),
+                foregroundColor: Theme.of(
+                  context,
+                ).elevatedButtonTheme.style?.foregroundColor?.resolve({}),
+              ),
+
+              child: Text('Calculate'),
+            ),
+          ),
+              ],
+            ),
+            // ElevatedButton(onPressed: addTransaction, child: Text('Add Entry')),
 
             SizedBox(height: 20),
+//             Row(
+//   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//   children: [
+//     Text(
+//       "${selectedMonth.year} - ${selectedMonth.month.toString().padLeft(2, '0')}",
+//       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//     ),
+//     TextButton.icon(
+//       icon: Icon(Icons.calendar_today),
+//       label: Text("Change Month"),
+//       onPressed: () async {
+//         DateTime? picked = await showDatePicker(
+//           context: context,
+//           initialDate: selectedMonth,
+//           firstDate: DateTime(2020),
+//           lastDate: DateTime(2100),
+//           helpText: 'Select month to filter',
+//         );
+
+//         if (picked != null) {
+//           setState(() {
+//             selectedMonth = DateTime(picked.year, picked.month);
+//           });
+//         }
+//       },
+//     ),
+//   ],
+// ),
+SizedBox(
+  height: 50,
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: 12,
+    itemBuilder: (context, index) {
+      final month = DateTime(DateTime.now().year, index + 1);
+      final isSelected = selectedMonth.month == month.month;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: ChoiceChip(
+          label: Text(
+            "${monthName(month.month)} ${month.year}",
+          ),
+          selected: isSelected,
+          onSelected: (_) {
+            setState(() {
+              selectedMonth = DateTime(month.year, month.month);
+            });
+          },
+        ),
+      );
+    },
+  ),
+),
+
+
             Expanded(
-              child: ListView.builder(
-                itemCount: transactions.length,
+              child:filteredTransactions.isEmpty
+      ? Center(
+          child: Text(
+            "No transactions available for this month.",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        )
+      : ListView.builder(
+                // itemCount: transactions.length,
+                itemCount: filteredTransactions.length,
                 itemBuilder: (context, index) {
-                  final tx = transactions[index];
+                  // final tx = transactions[index];
+                  final tx = filteredTransactions[index];
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
@@ -484,7 +611,30 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
                           ),
                           IconButton(
                             icon: Icon(Icons.delete),
-                            onPressed: () => deleteTransaction(index),
+                            // onPressed: () => deleteTransaction(index),
+                            onPressed: () {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Delete Entry'),
+      content: Text('Are you sure you want to delete this transaction?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(), // Cancel
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            deleteTransaction(index);
+            Navigator.of(context).pop(); // Close dialog
+          },
+          child: Text('Delete', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+},
+
                           ),
                         ],
                       ),
